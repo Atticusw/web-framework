@@ -6,20 +6,24 @@ import (
 	"net/http"
 )
 
-func main() {
-	// 指定路由添和对应的处理函数
-	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/hello", helloHandler)
-	log.Fatal(http.ListenAndServe(":9999", nil))
+// uni handler for all requests
+type Engine struct {
 }
 
-func indexHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "URL.Path = %q\n", req.URL.Path)
-}
-
-func helloHandler(w http.ResponseWriter, req *http.Request) {
-	// printf header info
-	for k, v := range req.Header {
-		fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
+func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Path {
+	case "/":
+		fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+	case "/hello":
+		for k, v := range r.Header {
+			fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
+		}
+	default:
+		fmt.Fprintf(w, "404 NOT FOUND : %s\n", r.URL)
 	}
+}
+func main() {
+	// init engine
+	engine := new(Engine)
+	log.Fatal(http.ListenAndServe(":9999", engine))
 }
