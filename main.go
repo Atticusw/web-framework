@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"web"
 )
@@ -9,15 +8,21 @@ import (
 func main() {
 	// init engine
 	engine := web.New()
-	engine.GET("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+
+	// 输入 html
+	engine.GET("/", func(c *web.Context) {
+		c.HTML(http.StatusOK, "<h1>Hello Web")
 	})
 
-	engine.POST("/hello", func(w http.ResponseWriter, r *http.Request) {
-		for k, v := range r.Header {
-			fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
-		}
+	engine.GET("/hello", func(c *web.Context) {
+		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Query("name"), c.Path)
 	})
 
+	engine.POST("/login", func(c *web.Context) {
+		c.JSON(http.StatusOK, web.H{
+			"username": c.PostForm("username"),
+			"password": c.PostForm("password"),
+		})
+	})
 	engine.Run(":9999")
 }
